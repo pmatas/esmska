@@ -180,7 +180,7 @@ public class Gateway implements GatewayInfo, Comparable<Gateway> {
             return "";
         }
         
-        // user wants to append his name signature
+        // user wants to add his name signature
         String result = signature.getUserName();
         // remove accents if required
         if (Config.getInstance().isRemoveAccents()) {

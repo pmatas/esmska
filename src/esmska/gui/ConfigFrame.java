@@ -123,12 +123,14 @@ public class ConfigFrame extends javax.swing.JFrame {
     private static final HashMap<String, Object> originalSettings = new HashMap<String, Object>();
     private final GatewayTableModel gwTableModel =  new GatewayTableModel();
     private final GatewaySelectionListener gwSelectionListener = new GatewaySelectionListener();
+    private Popup senderNamePopup;
 
     public enum Tabs {
         GENERAL, APPEARANCE, GATEWAYS, PRIVACY, CONNECTION
     }
 
-    private enum UpdateType {
+    /** Used for senderNamePopup */
+    private enum PopupUpdateType {
         SHOW, UPDATE, HIDE
     }
     
@@ -220,7 +222,7 @@ public class ConfigFrame extends javax.swing.JFrame {
         senderNameTextField.getDocument().addDocumentListener(new AbstractDocumentListener() {
             @Override
             public void onUpdate(DocumentEvent e) {
-                updateSenderNamePopup(UpdateType.UPDATE);
+                updateSenderNamePopup(PopupUpdateType.UPDATE);
             }
         });
         DocumentListener keyringListener = new AbstractDocumentListener() {
@@ -388,18 +390,18 @@ public class ConfigFrame extends javax.swing.JFrame {
     }
 
     /** Update the text in senderNamePopup and its visibility */
-    private void updateSenderNamePopup(UpdateType updateType) {
+    private void updateSenderNamePopup(PopupUpdateType updateType) {
         if (senderNamePopup != null) {
             senderNamePopup.hide();
         }
         
-        if (updateType == UpdateType.SHOW ||
-                (updateType == UpdateType.UPDATE && senderNamePopup != null)) {
-            String name = senderNameTextField.getText();
+        if (updateType == PopupUpdateType.SHOW ||
+                (updateType == PopupUpdateType.UPDATE && senderNamePopup != null)) {
+            String signature = MiscUtils.escapeHtml(senderNameTextField.getText());
             JToolTip toolTip = new JToolTip();
             toolTip.setTipText(MessageFormat.format(
                     l10n.getString("ConfigFrame.senderNamePopup.exampleText"),
-                    name));
+                    signature));
             toolTip.addMouseListener(new MouseAdapter() {
                 @Override
                 public void mouseClicked(MouseEvent e) {
@@ -1440,23 +1442,29 @@ private void demandDeliveryReportCheckBoxActionPerformed(ActionEvent evt) {//GEN
 }//GEN-LAST:event_demandDeliveryReportCheckBoxActionPerformed
 
     private void senderNameTextFieldFocusGained(FocusEvent evt) {//GEN-FIRST:event_senderNameTextFieldFocusGained
-        updateSenderNamePopup(UpdateType.SHOW);
+        updateSenderNamePopup(PopupUpdateType.SHOW);
     }//GEN-LAST:event_senderNameTextFieldFocusGained
 
     private void senderNameTextFieldFocusLost(FocusEvent evt) {//GEN-FIRST:event_senderNameTextFieldFocusLost
-        updateSenderNamePopup(UpdateType.HIDE);
+        updateSenderNamePopup(PopupUpdateType.HIDE);
     }//GEN-LAST:event_senderNameTextFieldFocusLost
 
     /** Adds a colon to the end of senderNameTextField
      * if the first characted has just been typed. */
     private void senderNameTextFieldKeyTyped(KeyEvent evt) {//GEN-FIRST:event_senderNameTextFieldKeyTyped
         char c = evt.getKeyChar();
-        if (c < ' ' || c == KeyEvent.CHAR_UNDEFINED) return;
-        if (senderNameTextField.getText().length() != 0) return;
+        if (c < ' ' || c == KeyEvent.CHAR_UNDEFINED) {
+            return;
+        }
+        if (senderNameTextField.getText().length() != 0) {
+            return;
+        }
         SwingUtilities.invokeLater(new Runnable() {
             @Override
             public void run() {
-                if (senderNameTextField.getText().length() == 0) return;
+                if (senderNameTextField.getText().length() == 0) {
+                    return;
+                }
                 String typed = senderNameTextField.getText();
                 senderNameTextField.setText(typed + ":");
                 senderNameTextField.setCaretPosition(typed.length());
@@ -1814,6 +1822,5 @@ private void demandDeliveryReportCheckBoxActionPerformed(ActionEvent evt) {//GEN
     private JCheckBox windowCenteredCheckBox;
     private BindingGroup bindingGroup;
     // End of variables declaration//GEN-END:variables
-    
-    private Popup senderNamePopup;
+
 }
